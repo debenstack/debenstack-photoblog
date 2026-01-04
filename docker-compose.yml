@@ -1,12 +1,33 @@
 
+volumes:
+    mysql-data:
+
 services:
     personalblog:
         container_name: ghost_personal_blog
-        image: ghost:3.20.2
+        #image: ghost:3.20.2
+        build: .
         restart: always
+        #stdin_open: true
+        #tty: true
+        #entrypoint: ["sleep", "infinity"]
         env_file: 
-            - ./generated/personalblog/.env
+            - ./.env
         ports:
             - 127.0.0.1:8080:2368
+        #volumes:
+        #    - ./content:/var/lib/ghost/content
+
+    mysql:
+        container_name: ghost_mysql
+        image: mysql:8
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: examplepassword
+            MYSQL_DATABASE: ghostdb
+            MYSQL_USER: ghostuser
+            MYSQL_PASSWORD: ghostpassword
+        ports:
+            - 3306:3306
         volumes:
-            - ./content:/var/lib/ghost/content
+            - mysql-data:/var/lib/mysql

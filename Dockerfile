@@ -1,8 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 #Prerequisites
 RUN apt update && apt upgrade -y && \
-    apt install --no-install-recommends sudo curl apt-utils ca-certificates nginx systemd -y && \
+    apt install --no-install-recommends sudo curl apt-utils ca-certificates nginx systemd adduser python3-full python3-pip -y && \
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Setup users and permissions
@@ -12,12 +12,12 @@ RUN adduser --disabled-password --gecos "" general && \
 USER general
 
 #Install Node v16
-RUN curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 RUN sudo apt update && sudo apt upgrade -y && sudo apt install -y nodejs
 
 #Configure Ghost
 ENV NODE_ENV production
-ENV GHOST_VERSION 4.48.8
+ENV GHOST_VERSION 6.10.3
 ENV GHOST_CLI_VERSION latest
 ENV GHOST_DIR /var/lib/ghost
 ENV GHOST_CONTENT_DIR /var/lib/ghost/content
@@ -48,7 +48,7 @@ RUN npm install ghost-storage-adapter-s3 && \
     cp -r ./node_modules/ghost-storage-adapter-s3 "${GHOST_CONTENT_DIR}/adapters/storage/s3"
 
 #Install 3rd Party Themes
-COPY ./content/themes/ "${GHOST_CONTENT_DIR}/themes/"
+COPY --chown=general:general --chmod=0777 ./content/themes/ "${GHOST_CONTENT_DIR}/themes/"
 
 #Entrypoint
 ENTRYPOINT [ "node", "current/index.js" ]
